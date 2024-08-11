@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface LoanService {
 
-    LoanResponseDTO createLoan(LoanRequestDTO loanRequest);
+    LoanResponseDTO createLoan(LoanRequestDTO loanRequest, String username);
 
     List<Loan> getPendingLoans();
 
@@ -16,5 +16,7 @@ public interface LoanService {
 
     Loan approveLoan(int loanId);
 
-    Loan repay(int loanId, int amount);
+    Loan repay(int loanId, int amount, String username);
+
+    List<Loan> getUserLoans(String username);
 }

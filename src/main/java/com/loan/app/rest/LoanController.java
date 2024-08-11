@@ -4,6 +4,8 @@ import com.loan.app.dtos.LoanRequestDTO;
 import com.loan.app.dtos.LoanResponseDTO;
 import com.loan.app.entities.Loan;
 import com.loan.app.services.LoanService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,30 +20,43 @@ public class LoanController {
         this.loanService = loanService;
     }
 
-    @PostMapping
-    public LoanResponseDTO applyForLoan(@RequestBody final LoanRequestDTO loanRequest) {
-        return loanService.createLoan(loanRequest);
+    @PostMapping("/create")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public LoanResponseDTO applyForLoan(@RequestBody final LoanRequestDTO loanRequest,
+                                        Authentication authentication) {
+        return loanService.createLoan(loanRequest,authentication.getName());
+    }
+
+    @GetMapping("/view")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public List<Loan> getLoans(Authentication authentication){
+        return loanService.getUserLoans(authentication.getName());
     }
 
     @GetMapping("/pending")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<Loan> getPendingLoans(){
         return loanService.getPendingLoans();
     }
 
-    @GetMapping
+    @GetMapping("/viewAll")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<Loan> getAllLoans(){
         return loanService.getAllLoans();
     }
 
-    @PatchMapping("/{loanId}/approve")
+    @PatchMapping("/approve/{loanId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Loan approveLoan(@PathVariable("loanId") final int loanId) {
         return loanService.approveLoan(loanId);
     }
 
-    @PatchMapping("/{loanId}/repay/{amount}")
+    @PatchMapping("repay/{loanId}/{amount}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public Loan repayLoan(@PathVariable("loanId") final int loanId,
-                          @PathVariable("amount") final int amount){
-        return loanService.repay(loanId,amount);
+                          @PathVariable("amount") final int amount,
+                          Authentication authentication){
+        return loanService.repay(loanId,amount,authentication.getName());
     }
 
 }

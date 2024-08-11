@@ -4,12 +4,10 @@ import com.loan.app.dtos.LoanRequestDTO;
 import com.loan.app.dtos.LoanResponseDTO;
 import com.loan.app.entities.Loan;
 import com.loan.app.entities.ScheduledPayment;
-import com.loan.app.entities.User;
 import com.loan.app.enums.LoanStatus;
 import com.loan.app.enums.PaymentStatus;
 import com.loan.app.exceptions.LoanException;
 import com.loan.app.repositories.LoanRepository;
-import com.loan.app.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,21 +18,14 @@ public class LoanServiceImpl implements LoanService {
 
     private final LoanRepository loanRepository;
 
-    private final UserRepository userRepository;
-
-    public LoanServiceImpl(LoanRepository loanRepository, UserRepository userRepository) {
+    public LoanServiceImpl(LoanRepository loanRepository) {
         this.loanRepository = loanRepository;
-        this.userRepository = userRepository;
     }
 
     @Override
-    public LoanResponseDTO createLoan(LoanRequestDTO loanRequest) {
-        User loanRequester = userRepository.findByUsername("rohan");
-        if (loanRequester == null) {
-            throw new LoanException("Invalid User: " + "rohan");
-        }
+    public LoanResponseDTO createLoan(LoanRequestDTO loanRequest, String username) {
         validateLoanRequest(loanRequest);
-        Loan loan = new Loan(loanRequest.amount(), loanRequest.term(), loanRequester, LoanStatus.PENDING);
+        Loan loan = new Loan(loanRequest.amount(), loanRequest.term(), username, LoanStatus.PENDING);
         int ewi = loanRequest.amount() / loanRequest.term();
         int roundingError = loanRequest.amount() - (ewi * loanRequest.term());
         LocalDate currDate = LocalDate.now();
@@ -53,7 +44,7 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public List<Loan> getPendingLoans() {
-        return loanRepository.findPendingLoans(userRepository.findByUsername("alpha"));
+        return loanRepository.findPendingLoans();
     }
 
     @Override
@@ -67,10 +58,13 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public Loan repay(int loanId, int amount) {
+    public Loan repay(int loanId, int amount, String username) {
         Loan loan = loanRepository.findById(loanId);
         if (loan == null) {
             throw new LoanException("Loan with this id doesn't exist: " + loanId);
+        }
+        if (loan.getLoaner().equals(username)){
+            throw new LoanException("Loan belongs to different user: "+loan.getLoaner());
         }
         if (loan.getStatus() == LoanStatus.PENDING) {
             throw new LoanException("Loan is in pending state");
@@ -97,6 +91,11 @@ public class LoanServiceImpl implements LoanService {
             loan.setResidualAmount(loan.getResidualAmount() + residualAmount);
         }
         return loan;
+    }
+
+    @Override
+    public List<Loan> getUserLoans(String username) {
+        return loanRepository.findLoansByUsername(username);
     }
 
     private void validateLoanRequest(LoanRequestDTO loanRequest) {

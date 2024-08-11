@@ -10,13 +10,13 @@ public class Loan implements Serializable {
     private int loanId;
     private final int amount;
     private final int tenure;
-    private final User loaner;
+    private final String loaner;
     private LoanStatus status;
     private final List<ScheduledPayment> scheduledPayments = new ArrayList<>();
     private int residualAmount;
     private int paidOnDate;
 
-    public Loan(int amount, int tenure, User loaner, LoanStatus status) {
+    public Loan(int amount, int tenure, String loaner, LoanStatus status) {
         this.amount = amount;
         this.tenure = tenure;
         this.loaner = loaner;
@@ -63,7 +63,7 @@ public class Loan implements Serializable {
         return tenure;
     }
 
-    public User getLoaner() {
+    public String getLoaner() {
         return loaner;
     }
 

@@ -1,9 +1,7 @@
 package com.loan.app.repositories;
 
 import com.loan.app.entities.Loan;
-import com.loan.app.entities.User;
 import com.loan.app.enums.LoanStatus;
-import com.loan.app.enums.UserType;
 import com.loan.app.exceptions.LoanException;
 import org.springframework.stereotype.Repository;
 
@@ -28,15 +26,12 @@ public class LoanRepository {
                 .findFirst().orElse(null);
     }
 
-    public List<Loan> findLoansByUser(User user){
-        return LOANS.stream().filter(loan -> loan.getLoaner() == user).toList();
+    public List<Loan> findLoansByUsername(String username){
+        return LOANS.stream().filter(loan -> loan.getLoaner() == username).toList();
     }
 
-    public List<Loan> findPendingLoans(User user) {
-        if (user.getType() == UserType.ADMIN){
-            return LOANS.stream().filter(loan -> loan.getStatus() == LoanStatus.PENDING).toList();
-        }
-        return new ArrayList<>();
+    public List<Loan> findPendingLoans() {
+        return LOANS.stream().filter(loan -> loan.getStatus() == LoanStatus.PENDING).toList();
     }
 
     public void save(Loan loan) {
