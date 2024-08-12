@@ -21,7 +21,7 @@ Access the server at http://localhost:8080/
 
 ## Assumptions
 
-1. User will create loan of minimum $100 (this value is configurable from application.properties) and for at least 1 week (this is done so that system is exploited for really small loans like $1)
+1. User will create loan of minimum $100 (this value is configurable from application.properties) and for at least 1 week (this is done so that system is exploited for tiny loans like $1)
 
 2. Rounding error will always be added to the last EWI (Equal Weekly Installments)
 
