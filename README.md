@@ -1,5 +1,24 @@
 # LoanApp
 
+## Requirements
+Install JDK 22 https://www.oracle.com/in/java/technologies/downloads/#jdk22-mac
+
+Clone repo: -
+
+git clone https://github.com/rakeshnarang5/LoanApp.git
+
+Install Maven https://maven.apache.org/download.cgi
+
+Build project: -
+
+mvn clean install 
+
+Run from terminal: -
+
+java -jar target/LoanApp-1.0-SNAPSHOT.jar
+
+Access the server at http://localhost:8080/
+
 ## Login via Postman
 http://localhost:8080/login
 
