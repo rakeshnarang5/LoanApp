@@ -29,6 +29,8 @@ Access the server at http://localhost:8080/
 
 4. If a user makes more payment that required, then that extra amount will be kept as residual amount and to the user at the end of the loan term. It will not be adjusted against next EWI.
 
+5. If user tries to make payment after due date, then that loan will go into Defaulted state and special handling can be done for it, which is kept open at the moment.
+
 ## Login via Postman
 http://localhost:8080/login
 
