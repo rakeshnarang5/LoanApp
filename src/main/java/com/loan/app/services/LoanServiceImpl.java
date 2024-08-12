@@ -85,6 +85,7 @@ public class LoanServiceImpl implements LoanService {
         scheduledPayment.setPaidOnDate(LocalDate.now());
         if (loan.getScheduledPayments().stream().allMatch(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)) {
             loan.setStatus(LoanStatus.PAID);
+            loan.setPaidOnDate(LocalDate.now());
         }
         int residualAmount = amount - scheduledPayment.getPaymentAmount();
         if (residualAmount != 0) {

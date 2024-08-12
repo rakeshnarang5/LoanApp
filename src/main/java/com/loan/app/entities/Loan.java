@@ -3,6 +3,7 @@ package com.loan.app.entities;
 import com.loan.app.enums.LoanStatus;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class Loan implements Serializable {
     private LoanStatus status;
     private final List<ScheduledPayment> scheduledPayments = new ArrayList<>();
     private int residualAmount;
-    private int paidOnDate;
+    private LocalDate paidOnDate;
 
     public Loan(int amount, int tenure, String loaner, LoanStatus status) {
         this.amount = amount;
@@ -23,11 +24,11 @@ public class Loan implements Serializable {
         this.status = status;
     }
 
-    public int getPaidOnDate() {
+    public LocalDate getPaidOnDate() {
         return paidOnDate;
     }
 
-    public void setPaidOnDate(int paidOnDate) {
+    public void setPaidOnDate(LocalDate paidOnDate) {
         this.paidOnDate = paidOnDate;
     }
 

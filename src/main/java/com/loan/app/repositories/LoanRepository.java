@@ -27,7 +27,7 @@ public class LoanRepository {
     }
 
     public List<Loan> findLoansByUsername(String username){
-        return LOANS.stream().filter(loan -> loan.getLoaner() == username).toList();
+        return LOANS.stream().filter(loan -> loan.getLoaner().equals(username)).toList();
     }
 
     public List<Loan> findPendingLoans() {
