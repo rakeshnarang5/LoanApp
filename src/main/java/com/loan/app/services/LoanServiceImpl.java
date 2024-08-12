@@ -8,6 +8,8 @@ import com.loan.app.enums.LoanStatus;
 import com.loan.app.enums.PaymentStatus;
 import com.loan.app.exceptions.LoanException;
 import com.loan.app.repositories.LoanRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +17,8 @@ import java.util.List;
 
 @Service
 public class LoanServiceImpl implements LoanService {
+
+    private final Logger logger = LoggerFactory.getLogger(LoanServiceImpl.class);
 
     private final LoanRepository loanRepository;
 
@@ -24,9 +28,11 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequest, String username) {
+        logger.info("Started creating loan for user: {} with amount: {} and tenure: {}", username, loanRequest.amount(), loanRequest.term());
         validateLoanRequest(loanRequest);
         Loan loan = getLoan(loanRequest, username);
         loanRepository.save(loan);
+        logger.info("Loan created successfully in pending state with id: {}", loan.getLoanId());
         return new LoanResponseDTO(loanRequest, loan);
     }
 
@@ -65,21 +71,39 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public Loan repay(int loanId, int amount, String username) {
         Loan loan = loanRepository.findById(loanId);
-        if (loan == null) {
-            throw new LoanException("Loan with this id doesn't exist: " + loanId);
-        }
-        if (!loan.getUser().equals(username)){
-            throw new LoanException("Loan belongs to different user: "+loan.getUser());
-        }
-        if (loan.getStatus() == LoanStatus.PENDING) {
-            throw new LoanException("Loan is in pending state");
-        }
-        if (loan.getStatus() == LoanStatus.PAID) {
-            throw new LoanException("Loan is already paid off.");
-        }
+        validateLoan(loanId, username, loan);
+        logger.info("Loan with id: {} validated successfully", loanId);
         ScheduledPayment scheduledPayment = loan.getScheduledPayments().stream()
                 .filter(payment -> payment.getPaymentStatus() == PaymentStatus.PENDING)
                 .findFirst().orElse(null);
+        validateScheduledPayment(loanId, amount, scheduledPayment, loan);
+        updateScheduledPayment(scheduledPayment);
+        if (loan.getScheduledPayments().stream().allMatch(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)) {
+            updateLoan(loan);
+        }
+        updateResidualAmount(amount, scheduledPayment, loan);
+        logger.info("User: {} made successful payment towards their loan: {} with amount: {} and dated: {}", username, loanId, scheduledPayment.getPaymentAmount(), scheduledPayment.getPaymentDueDate());
+        return loan;
+    }
+
+    private static void updateResidualAmount(int amount, ScheduledPayment scheduledPayment, Loan loan) {
+        int residualAmount = amount - scheduledPayment.getPaymentAmount();
+        if (residualAmount != 0) {
+            loan.setResidualAmount(loan.getResidualAmount() + residualAmount);
+        }
+    }
+
+    private static void updateLoan(Loan loan) {
+        loan.setStatus(LoanStatus.PAID);
+        loan.setPaidOnDate(LocalDate.now());
+    }
+
+    private static void updateScheduledPayment(ScheduledPayment scheduledPayment) {
+        scheduledPayment.setPaymentStatus(PaymentStatus.PAID);
+        scheduledPayment.setPaidOnDate(LocalDate.now());
+    }
+
+    private static void validateScheduledPayment(int loanId, int amount, ScheduledPayment scheduledPayment, Loan loan) {
         if (scheduledPayment == null) {
             throw new LoanException("No payment pending for loan: " + loanId);
         }
@@ -90,17 +114,21 @@ public class LoanServiceImpl implements LoanService {
         if (scheduledPayment.getPaymentAmount() > amount) {
             throw new LoanException("Minimum payment amount is: " + scheduledPayment.getPaymentAmount());
         }
-        scheduledPayment.setPaymentStatus(PaymentStatus.PAID);
-        scheduledPayment.setPaidOnDate(LocalDate.now());
-        if (loan.getScheduledPayments().stream().allMatch(payment -> payment.getPaymentStatus() == PaymentStatus.PAID)) {
-            loan.setStatus(LoanStatus.PAID);
-            loan.setPaidOnDate(LocalDate.now());
+    }
+
+    private static void validateLoan(int loanId, String username, Loan loan) {
+        if (loan == null) {
+            throw new LoanException("Loan with this id doesn't exist: " + loanId);
         }
-        int residualAmount = amount - scheduledPayment.getPaymentAmount();
-        if (residualAmount != 0) {
-            loan.setResidualAmount(loan.getResidualAmount() + residualAmount);
+        if (!loan.getUser().equals(username)){
+            throw new LoanException("Loan belongs to different user: "+ loan.getUser());
         }
-        return loan;
+        if (loan.getStatus() == LoanStatus.PENDING) {
+            throw new LoanException("Loan is in pending state");
+        }
+        if (loan.getStatus() == LoanStatus.PAID) {
+            throw new LoanException("Loan is already paid off.");
+        }
     }
 
     @Override
