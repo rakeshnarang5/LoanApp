@@ -137,3 +137,7 @@ Admin can approve loans via this api
 http://localhost:8080/loans/repay/1/3400
 
 A user can repay his/her loans via this API
+
+## Tests
+
+![img_1.png](img_1.png)
