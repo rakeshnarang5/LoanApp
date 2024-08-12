@@ -11,16 +11,16 @@ public class Loan implements Serializable {
     private int loanId;
     private final int amount;
     private final int tenure;
-    private final String loaner;
+    private final String user;
     private LoanStatus status;
     private final List<ScheduledPayment> scheduledPayments = new ArrayList<>();
     private int residualAmount;
     private LocalDate paidOnDate;
 
-    public Loan(int amount, int tenure, String loaner, LoanStatus status) {
+    public Loan(int amount, int tenure, String user, LoanStatus status) {
         this.amount = amount;
         this.tenure = tenure;
-        this.loaner = loaner;
+        this.user = user;
         this.status = status;
     }
 
@@ -64,8 +64,8 @@ public class Loan implements Serializable {
         return tenure;
     }
 
-    public String getLoaner() {
-        return loaner;
+    public String getUser() {
+        return user;
     }
 
     public LoanStatus getStatus() {

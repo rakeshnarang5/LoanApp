@@ -25,6 +25,12 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequest, String username) {
         validateLoanRequest(loanRequest);
+        Loan loan = getLoan(loanRequest, username);
+        loanRepository.save(loan);
+        return new LoanResponseDTO(loanRequest, loan);
+    }
+
+    private static Loan getLoan(LoanRequestDTO loanRequest, String username) {
         Loan loan = new Loan(loanRequest.amount(), loanRequest.term(), username, LoanStatus.PENDING);
         int ewi = loanRequest.amount() / loanRequest.term();
         int roundingError = loanRequest.amount() - (ewi * loanRequest.term());
@@ -38,8 +44,7 @@ public class LoanServiceImpl implements LoanService {
             loan.addScheduledPayment(new ScheduledPayment(ewi, ewiDate, PaymentStatus.PENDING));
             currDate = ewiDate;
         }
-        loanRepository.save(loan);
-        return new LoanResponseDTO(loanRequest, loan);
+        return loan;
     }
 
     @Override
@@ -63,8 +68,8 @@ public class LoanServiceImpl implements LoanService {
         if (loan == null) {
             throw new LoanException("Loan with this id doesn't exist: " + loanId);
         }
-        if (loan.getLoaner().equals(username)){
-            throw new LoanException("Loan belongs to different user: "+loan.getLoaner());
+        if (!loan.getUser().equals(username)){
+            throw new LoanException("Loan belongs to different user: "+loan.getUser());
         }
         if (loan.getStatus() == LoanStatus.PENDING) {
             throw new LoanException("Loan is in pending state");
@@ -79,7 +84,7 @@ public class LoanServiceImpl implements LoanService {
             throw new LoanException("No payment pending for loan: " + loanId);
         }
         if (scheduledPayment.getPaymentAmount() > amount) {
-            throw new LoanException("Minimum payment amount is: " + amount);
+            throw new LoanException("Minimum payment amount is: " + scheduledPayment.getPaymentAmount());
         }
         scheduledPayment.setPaymentStatus(PaymentStatus.PAID);
         scheduledPayment.setPaidOnDate(LocalDate.now());
