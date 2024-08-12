@@ -10,6 +10,7 @@ import com.loan.app.exceptions.LoanException;
 import com.loan.app.repositories.LoanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,6 +26,9 @@ public class LoanServiceImpl implements LoanService {
     public LoanServiceImpl(LoanRepository loanRepository) {
         this.loanRepository = loanRepository;
     }
+
+    @Value("${loan.app.minimum.threshold}")
+    private int minimumLoanValue;
 
     @Override
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequest, String username) {
@@ -137,8 +141,8 @@ public class LoanServiceImpl implements LoanService {
     }
 
     private void validateLoanRequest(LoanRequestDTO loanRequest) {
-        if (loanRequest.amount() < 100) {
-            throw new LoanException("Minimum Loan Amount is $100");
+        if (loanRequest.amount() < minimumLoanValue) {
+            throw new LoanException("Minimum Loan Amount is $"+minimumLoanValue);
         }
         if (loanRequest.term() < 1) {
             throw new LoanException("Minimum Loan Term is 1w");

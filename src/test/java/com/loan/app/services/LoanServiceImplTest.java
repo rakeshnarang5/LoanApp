@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -188,6 +189,7 @@ public class LoanServiceImplTest {
 
     @Test
     public void testCreateLoanInvalidLoanRequestAmount() {
+        ReflectionTestUtils.setField(loanServiceImpl, "minimumLoanValue", 100);
         Mockito.when(request.amount()).thenReturn(50);
         LoanException loanException = null;
         try{

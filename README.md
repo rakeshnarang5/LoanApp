@@ -19,6 +19,16 @@ java -jar target/LoanApp-1.0-SNAPSHOT.jar
 
 Access the server at http://localhost:8080/
 
+## Assumptions
+
+1. User will create loan of minimum $100 (this value is configurable from application.properties) and for at least 1 week (this is done so that system is exploited for really small loans like $1)
+
+2. Rounding error will always be added to the last EWI (Equal Weekly Installments)
+
+3. Database implementation is not done in this project but a repository is used which can later be replaced with a SQL / NoSQL DB implementation (since loan apps require ACID properties, **Relational database will be my choice**)
+
+4. If a user makes more payment that required, then that extra amount will be kept as residual amount and to the user at the end of the loan term. It will not be adjusted against next EWI.
+
 ## Login via Postman
 http://localhost:8080/login
 
