@@ -1,5 +1,9 @@
 # LoanApp
 
+This is a simple loan app where a user can apply for loans and repay them.
+
+Admin can approve and monitor the loans.
+
 ## Requirements
 Install JDK 22 https://www.oracle.com/in/java/technologies/downloads/#jdk22-mac
 
@@ -32,6 +36,9 @@ Access the server at http://localhost:8080/
 5. If user tries to make payment after due date, then that loan will go into Defaulted state and special handling can be done for it, which is kept open at the moment.
 
 ## Login via Postman
+
+**This API is managed by Spring Security.**
+
 http://localhost:8080/login
 
 In body enter format data for regular users
@@ -50,11 +57,15 @@ alpha => alpha@123
 
 ## Logout via Postman
 
+**This API is also managed by Spring Security**
+
 If you want to change users, click http://localhost:8080/logout
 
 And then login again with new user
 
 ## Create loan via Postman
+
+**This API can be used by a logged in, authenticated user to request for a loan.**
 
 http://localhost:8080/loans/create
 
@@ -100,6 +111,8 @@ Response: -
 }
 
 ## View loan via Postman
+
+**By hitting this API, a user can get a list of loans that are tagged to his/her account.**
 
 http://localhost:8080/loans/view
 
