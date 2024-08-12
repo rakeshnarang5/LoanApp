@@ -42,17 +42,17 @@ public class LoanServiceImpl implements LoanService {
 
     private static Loan getLoan(LoanRequestDTO loanRequest, String username) {
         Loan loan = new Loan(loanRequest.amount(), loanRequest.term(), username, LoanStatus.PENDING);
-        int ewi = loanRequest.amount() / loanRequest.term();
-        int roundingError = loanRequest.amount() - (ewi * loanRequest.term());
-        LocalDate currDate = LocalDate.now();
-        for (int i = 0; i < loanRequest.term(); i++) {
-            LocalDate ewiDate = currDate.plusWeeks(1);
-            if (i == loanRequest.term() - 1) {
-                loan.addScheduledPayment(new ScheduledPayment(ewi + roundingError, ewiDate, PaymentStatus.PENDING));
+        int equalWeeklyInstallment = loanRequest.amount() / loanRequest.term();
+        int roundingError = loanRequest.amount() - (equalWeeklyInstallment * loanRequest.term());
+        LocalDate currentDate = LocalDate.now();
+        for (int termIterator = 0; termIterator < loanRequest.term(); termIterator++) {
+            LocalDate installmentDate = currentDate.plusWeeks(1);
+            if (termIterator == loanRequest.term() - 1) {
+                loan.addScheduledPayment(new ScheduledPayment(equalWeeklyInstallment + roundingError, installmentDate, PaymentStatus.PENDING));
                 continue;
             }
-            loan.addScheduledPayment(new ScheduledPayment(ewi, ewiDate, PaymentStatus.PENDING));
-            currDate = ewiDate;
+            loan.addScheduledPayment(new ScheduledPayment(equalWeeklyInstallment, installmentDate, PaymentStatus.PENDING));
+            currentDate = installmentDate;
         }
         return loan;
     }
