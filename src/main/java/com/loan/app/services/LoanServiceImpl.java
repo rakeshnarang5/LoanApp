@@ -83,6 +83,10 @@ public class LoanServiceImpl implements LoanService {
         if (scheduledPayment == null) {
             throw new LoanException("No payment pending for loan: " + loanId);
         }
+        if (LocalDate.now().isAfter(scheduledPayment.getPaymentDueDate())){
+            loan.setStatus(LoanStatus.DEFAULTED);
+            throw new LoanException("Payment cannot be done after due date, loan is moved Defaulted state");
+        }
         if (scheduledPayment.getPaymentAmount() > amount) {
             throw new LoanException("Minimum payment amount is: " + scheduledPayment.getPaymentAmount());
         }

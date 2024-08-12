@@ -52,10 +52,29 @@ public class LoanServiceImplTest {
     }
 
     @Test
+    public void testRepayInvalidRequestDueDatePassed(){
+        LoanException loanException = null;
+        Mockito.when(scheduledPayment.getPaymentStatus()).thenReturn(PaymentStatus.PENDING);
+        Mockito.when(scheduledPayment.getPaymentDueDate()).thenReturn(LocalDate.now().minusWeeks(1));
+        Mockito.when(loan.getScheduledPayments()).thenReturn(List.of(scheduledPayment));
+        Mockito.when(loan.getUser()).thenReturn("rohan");
+        Mockito.when(loan.getStatus()).thenReturn(LoanStatus.APPROVED);
+        Mockito.when(loanRepository.findById(1)).thenReturn(loan);
+        try{
+            loanServiceImpl.repay(1,2500, "rohan");
+        } catch (LoanException e){
+            loanException=e;
+        }
+        Assertions.assertNotNull(loanException);
+        Assertions.assertEquals("Payment cannot be done after due date, loan is moved Defaulted state", loanException.getMessage());
+    }
+
+    @Test
     public void testRepayInvalidRequestAmountPaidLess(){
         LoanException loanException = null;
         Mockito.when(scheduledPayment.getPaymentAmount()).thenReturn(3333);
         Mockito.when(scheduledPayment.getPaymentStatus()).thenReturn(PaymentStatus.PENDING);
+        Mockito.when(scheduledPayment.getPaymentDueDate()).thenReturn(LocalDate.now().plusWeeks(1));
         Mockito.when(loan.getScheduledPayments()).thenReturn(List.of(scheduledPayment));
         Mockito.when(loan.getUser()).thenReturn("rohan");
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.APPROVED);
